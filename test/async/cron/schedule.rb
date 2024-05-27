@@ -22,6 +22,22 @@ describe Async::Cron::Schedule do
 		end
 	end
 	
+	with "a basic 2-hourly schedule" do
+		let(:schedule) {subject.parse("0 0 */2 * * *")}
+		let(:time) {Async::Cron::Time.new(2024, 0, 0, 0, 0, 0, 0)}
+		
+		it "should parse the schedule" do
+			time = schedule.increment(self.time)
+			expect(time).to be == Async::Cron::Time.new(2024, 0, 0, 2, 0, 0, 0)
+			
+			time = schedule.increment(time)
+			expect(time).to be == Async::Cron::Time.new(2024, 0, 0, 4, 0, 0, 0)
+			
+			time = schedule.increment(time)
+			expect(time).to be == Async::Cron::Time.new(2024, 0, 0, 6, 0, 0, 0)
+		end
+	end
+	
 	with "the first friday of every month" do
 		let(:schedule) {subject.parse("0 0 0 6 1-7 *")}
 		let(:time) {Async::Cron::Time.new(2024, 0, 0, 0, 0, 0, 0)}

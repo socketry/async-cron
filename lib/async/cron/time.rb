@@ -44,6 +44,20 @@ module Async
 				@offset = offset
 			end
 			
+			def freeze
+				return self if frozen?
+				
+				@years.freeze
+				@months.freeze
+				@days.freeze
+				@hours.freeze
+				@minutes.freeze
+				@seconds.freeze
+				@offset.freeze
+				
+				super
+			end
+			
 			attr_accessor :years
 			attr_accessor :months
 			attr_accessor :days
@@ -68,17 +82,6 @@ module Async
 				else
 					@days = ::Date.new(@years, @months+1, value).day
 				end
-			end
-			
-			def increment(years, months, days, hours, minutes, seconds)
-				@years += years
-				@months += months
-				@days += days
-				@hours += hours
-				@minutes += minutes
-				@seconds += seconds
-				
-				return self
 			end
 			
 			def to_a
@@ -106,9 +109,10 @@ module Async
 				
 				if duration > 0
 					::Kernel.sleep(duration)
+					return duration
+				else
+					return 0
 				end
-				
-				return duration
 			end
 			
 			def to_time
@@ -159,7 +163,7 @@ module Async
 			end
 			
 			def to_s
-				"#{years}+#{months}+#{days} #{hours}:#{minutes}:#{seconds} #{offset}"
+				sprintf("%04d+%02d+%02d %02d:%02d:%02d %d", years, months, days, hours, minutes, seconds, offset)
 			end
 		end
 	end

@@ -35,7 +35,7 @@ module Async
 			
 			RANGE = nil
 			
-			def initialize(value, divisor = 1, range: self.class::RANGE)
+			def initialize(value = nil, divisor = 1, range: self.class::RANGE)
 				@value = value
 				@divisor = divisor
 				@range = range
@@ -44,6 +44,10 @@ module Async
 					# This is an optimization to avoid recalculating the successors every time:
 					@successors = successors(@values)
 				end
+			end
+			
+			def to_a
+				@values
 			end
 			
 			# Increment the specific time unit to the next possible value.
@@ -60,18 +64,9 @@ module Async
 				return time
 			end
 			
-			# Whether it's possible to reset the specific time unit to some meaningful initial value.
-			def reset?
-				@values&.any?
-			end
-			
 			# Reset the specific time unit to the first value.
 			def reset(time)
 				time.seconds = @values.first
-			end
-			
-			def value_from(time)
-				time.seconds
 			end
 			
 			def include?(time)
@@ -83,6 +78,10 @@ module Async
 			end
 			
 		private
+			
+			def value_from(time)
+				time.seconds
+			end
 			
 			def expand(values)
 				case values
@@ -119,6 +118,7 @@ module Async
 			
 			def divide(values)
 				return values if @divisor == 1 or values.size <= 1
+				raise ArgumentError, "Invalid divisor: #{@divisor}" unless @divisor > 1
 				
 				offset = values.first
 				filtered = {}

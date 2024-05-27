@@ -40,4 +40,81 @@ describe Async::Cron::Time do
 		expect(time.hours).to be == 0
 		expect(time.days).to be == 2
 	end
+	
+	with "#freeze" do
+		it "can freeze" do
+			expect(time.freeze).to be == time
+			expect(time).to be(:frozen?)
+		end
+	end
+	
+	with "#to_time" do
+		it "can convert to Time" do
+			expect(time.to_time).to be == ::Time.utc(2024, 1, 1, 0, 0, 0)
+		end
+	end
+	
+	with "#to_datetime" do
+		it "can convert to DateTime" do
+			expect(time.to_datetime).to be == ::DateTime.new(2024, 1, 1, 0, 0, 0)
+		end
+	end
+	
+	with "#to_s" do
+		it "can convert to string" do
+			expect(time.to_s).to be == "2024+00+00 00:00:00 0"
+		end
+	end
+	
+	with "#hash" do
+		let(:hash) {Hash.new}
+		
+		it "can store in hash" do
+			hash[time] = true
+			expect(hash[time]).to be == true
+		end
+	end
+	
+	with "#eql?" do
+		let(:other) {Async::Cron::Time.new(2025, 0, 0, 0, 0, 0, 0)}
+		
+		it "can compare equality with different time" do
+			expect(time.eql?(other)).to be == false
+		end
+		
+		it "can compare equality with same time" do
+			expect(time.eql?(time)).to be == true
+		end
+	end
+	
+	with "#sleep" do
+		let(:time) {Async::Cron::Time.now}
+		
+		it "doesn't sleep for time in the past" do
+			expect(time.sleep).to be == 0
+		end
+
+		it "sleeps for time in the future" do
+			expect(::Kernel).to receive(:sleep).with(1).and_return(nil)
+			time.seconds += 1
+			expect(time.sleep).to be > 0
+		end
+	end
+	
+	with ".from" do
+		it "can create from Time" do
+			time = Async::Cron::Time.from(::Time.utc(2024, 1, 1, 0, 0, 0))
+			expect(time.to_s).to be == "2024+00+00 00:00:00 0"
+		end
+		
+		it "can create from DateTime" do
+			time = Async::Cron::Time.from(::DateTime.new(2024, 1, 1, 0, 0, 0))
+			expect(time.to_s).to be == "2024+00+00 00:00:00 0"
+		end
+		
+		it "can create from Date" do
+			time = Async::Cron::Time.from(::Date.new(2024, 1, 1))
+			expect(time.to_s).to be == "2024+00+00 00:00:00 0"
+		end
+	end
 end
