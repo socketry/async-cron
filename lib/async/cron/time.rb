@@ -44,6 +44,10 @@ module Async
 				@offset = offset
 			end
 			
+			def past?
+				self < self.class.now
+			end
+			
 			def freeze
 				return self if frozen?
 				
@@ -104,8 +108,12 @@ module Async
 				self.to_time - other.to_time
 			end
 			
+			def delta
+				self - self.class.now
+			end
+			
 			def sleep(delta = 0)
-				duration = self - self.class.now + delta
+				duration = self.delta + delta
 				
 				if duration > 0
 					::Kernel.sleep(duration)

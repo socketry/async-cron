@@ -5,7 +5,7 @@
 
 source 'https://rubygems.org'
 
-# gemspec
+gemspec
 
 group :maintenance, optional: true do
 	gem "bake-gem"

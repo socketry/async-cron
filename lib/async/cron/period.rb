@@ -8,8 +8,11 @@ require_relative 'time'
 module Async
 	module Cron
 		class Period
+			# Parse a string into a period.
+			# @parameter string [String | Nil] The string to parse.
 			def self.parse(string)
-				value, divisor = string.split('/', 2)
+				value, divisor = string&.split('/', 2)
+				
 				if divisor
 					divisor = Integer(divisor)
 				else
@@ -18,7 +21,7 @@ module Async
 				
 				if value == '*'
 					value = nil
-				else
+				elsif value
 					value = value.split(',').map do |part|
 						if part =~ /\A(\d+)-(\d+)\z/
 							Range.new(Integer($1), Integer($2))
