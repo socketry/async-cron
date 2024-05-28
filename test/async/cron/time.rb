@@ -87,20 +87,6 @@ describe Async::Cron::Time do
 		end
 	end
 	
-	with "#sleep" do
-		let(:time) {Async::Cron::Time.now}
-		
-		it "doesn't sleep for time in the past" do
-			expect(time.sleep).to be == 0
-		end
-
-		it "sleeps for time in the future" do
-			expect(::Kernel).to receive(:sleep).with(1).and_return(nil)
-			time.seconds += 1
-			expect(time.sleep).to be > 0
-		end
-	end
-	
 	with ".from" do
 		it "can create from Time" do
 			time = Async::Cron::Time.from(::Time.utc(2024, 1, 1, 0, 0, 0))

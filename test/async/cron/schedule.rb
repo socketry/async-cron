@@ -1,78 +1,59 @@
-# frozen_string_literal: true
-
-# Released under the MIT License.
-# Copyright, 2024, by Samuel Williams.
-
 require 'async/cron/schedule'
 
 describe Async::Cron::Schedule do
-	with "a basic hourly schedule" do
-		let(:schedule) {subject.parse("0 0 * * * *")}
-		let(:time) {Async::Cron::Time.new(2024, 0, 0, 0, 0, 0, 0)}
+	let(:flags) {Async::Cron::Schedule::Flags.new(drop: false)}
+	let(:schedule) {Async::Cron::Schedule::Generic.new(flags)}
+	
+	it "should invoke the schedule" do
+		invoked = 0
 		
-		it "should parse the schedule" do
-			time = schedule.increment(self.time)
-			expect(time).to be == Async::Cron::Time.new(2024, 0, 0, 1, 0, 0, 0)
+		schedule.run_once do |time|
+			invoked += 1
+		end
+		
+		expect(invoked).to be == 1
+	end
+	
+	it "continues even if there is an error" do
+		invoked = 0
+		
+		schedule.run_once do |time|
+			invoked += 1
+			raise "Oops!"
+		end
+		
+		expect(invoked).to be == 1
+	end
+	
+	with "#run" do
+		it "can run several times" do
+			invoked = 0
 			
-			time = schedule.increment(time)
-			expect(time).to be == Async::Cron::Time.new(2024, 0, 0, 2, 0, 0, 0)
+			schedule.run do |time|
+				invoked += 1
+				
+				if invoked >= 3
+					break
+				end
+			end
 			
-			time = schedule.increment(time)
-			expect(time).to be == Async::Cron::Time.new(2024, 0, 0, 3, 0, 0, 0)
+			expect(invoked).to be == 3
 		end
 	end
 	
-	with "a basic 2-hourly schedule" do
-		let(:schedule) {subject.parse("0 0 */2 * * *")}
-		let(:time) {Async::Cron::Time.new(2024, 0, 0, 0, 0, 0, 0)}
+	with "dropping schedule" do
+		let(:flags) {Async::Cron::Schedule::Flags.new(drop: true)}
 		
-		it "should parse the schedule" do
-			time = schedule.increment(self.time)
-			expect(time).to be == Async::Cron::Time.new(2024, 0, 0, 2, 0, 0, 0)
+		it "should fail to invoke the schedule" do
+			invoked = 0
 			
-			time = schedule.increment(time)
-			expect(time).to be == Async::Cron::Time.new(2024, 0, 0, 4, 0, 0, 0)
+			expect do
+				schedule.run_once do |time|
+					invoked += 1
+				end
+			end.to raise_exception(RuntimeError, message: be =~ /time is not advancing/)
 			
-			time = schedule.increment(time)
-			expect(time).to be == Async::Cron::Time.new(2024, 0, 0, 6, 0, 0, 0)
-		end
-	end
-	
-	with "the first friday of every month" do
-		let(:schedule) {subject.parse("0 0 0 6 1-7 *")}
-		let(:time) {Async::Cron::Time.new(2024, 0, 0, 0, 0, 0, 0)}
-		
-		it "should parse the schedule" do
-			time = schedule.increment(self.time)
-			expect(time).to be == Async::Cron::Time.new(2024, 0, 5, 0, 0, 0, 0)
-			
-			time = schedule.increment(time)
-			expect(time).to be == Async::Cron::Time.new(2024, 1, 2, 0, 0, 0, 0)
-			
-			time = schedule.increment(time)
-			expect(time).to be == Async::Cron::Time.new(2024, 2, 1, 0, 0, 0, 0)
-			
-			time = schedule.increment(time)
-			expect(time).to be == Async::Cron::Time.new(2024, 3, 5, 0, 0, 0, 0)
-		end
-	end
-	
-	with "the last friday of every month" do
-		let(:schedule) {subject.parse("0 0 0 6 -7..-1 *")}
-		let(:time) {Async::Cron::Time.new(2024, 0, 0, 0, 0, 0, 0)}
-		
-		it "should parse the schedule" do
-			time = schedule.increment(self.time)
-			expect(time).to be == Async::Cron::Time.new(2024, 0, 26, 0, 0, 0, 0)
-			
-			time = schedule.increment(time)
-			expect(time).to be == Async::Cron::Time.new(2024, 1, 23, 0, 0, 0, 0)
-			
-			time = schedule.increment(time)
-			expect(time).to be == Async::Cron::Time.new(2024, 2, 29, 0, 0, 0, 0)
-			
-			time = schedule.increment(time)
-			expect(time).to be == Async::Cron::Time.new(2024, 3, 26, 0, 0, 0, 0)
+			expect(invoked).to be == 0
 		end
 	end
 end

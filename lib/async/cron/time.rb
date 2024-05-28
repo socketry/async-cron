@@ -7,6 +7,9 @@ require 'date'
 
 module Async
 	module Cron
+		# A base-zero that supports assigning arbitrary values (both positive and negative) to all units. This simplifies computing relative times and dates by incrementing the relevant units and normalizing the result.
+		#
+		# **Note that base-zero means that the month and day start from zero, not one, as is the case with the standard Ruby Time and Date classes.** That is because the fields also accept negative values, which would be ambiguous if the month and day started from one.
 		class Time
 			include Comparable
 			
@@ -42,10 +45,6 @@ module Async
 				@minutes = minutes
 				@seconds = seconds
 				@offset = offset
-			end
-			
-			def past?
-				self < self.class.now
 			end
 			
 			def freeze
@@ -104,23 +103,8 @@ module Async
 				to_a.eql?(other.to_a)
 			end
 			
-			def - other
-				self.to_time - other.to_time
-			end
-			
 			def delta
-				self - self.class.now
-			end
-			
-			def sleep(delta = 0)
-				duration = self.delta + delta
-				
-				if duration > 0
-					::Kernel.sleep(duration)
-					return duration
-				else
-					return 0
-				end
+				self.to_time - ::Time.now
 			end
 			
 			def to_time

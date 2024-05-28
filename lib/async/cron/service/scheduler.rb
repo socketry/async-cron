@@ -4,7 +4,7 @@
 # Copyright, 2019-2024, by Samuel Williams.
 # Copyright, 2020, by Daniel Evans.
 
-require_relative '../schedule'
+require 'async/service/generic'
 
 module Async
 	module Cron
