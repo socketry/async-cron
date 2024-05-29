@@ -18,6 +18,8 @@ group :test do
 	gem "sus"
 	gem "covered"
 	
+	gem "sus-fixtures-console"
+	
 	gem "bake-test"
 	gem "bake-test-external"
 end

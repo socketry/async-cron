@@ -1,6 +1,10 @@
 require 'async/cron/schedule'
 
+require 'sus/fixtures/console/captured_logger'
+
 describe Async::Cron::Schedule do
+	include_context Sus::Fixtures::Console::CapturedLogger
+	
 	let(:flags) {Async::Cron::Schedule::Flags.new(drop: false)}
 	let(:schedule) {Async::Cron::Schedule::Generic.new(flags)}
 	
@@ -23,6 +27,15 @@ describe Async::Cron::Schedule do
 		end
 		
 		expect(invoked).to be == 1
+		message = capture.last
+		
+		expect(message).to have_keys(
+			event: have_keys(
+				type: be == :failure,
+				class: be == "RuntimeError",
+				message: be == "Oops!"
+			)
+		)
 	end
 	
 	with "#run" do
