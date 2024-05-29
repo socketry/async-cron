@@ -25,4 +25,14 @@ describe Async::Cron::Scheduler do
 		
 		expect(invoked).to be == 3
 	end
+	
+	with '.load' do
+		let(:root) {File.expand_path('.scheduler', __dir__)}
+		
+		it "should load the scheduler" do
+			scheduler = Async::Cron::Scheduler.load(root)
+			
+			expect(scheduler.schedules).to be(:any?)
+		end
+	end
 end

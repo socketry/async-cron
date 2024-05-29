@@ -11,6 +11,10 @@ module Async
 		module Environment
 			# Provides an environment for hosting a web application that uses a Falcon server.
 			module Scheduler
+				def name
+					super || "scheduler"
+				end
+				
 				# The service class to use for the proxy.
 				# @returns [Class]
 				def service_class
@@ -18,7 +22,7 @@ module Async
 				end
 				
 				def scheduler
-					Cron::Scheduler.new
+					Cron::Scheduler.load(self.root)
 				end
 				
 				def container_options
