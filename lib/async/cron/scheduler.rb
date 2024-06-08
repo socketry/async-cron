@@ -39,7 +39,7 @@ module Async
 				end
 			end
 			
-			PATH = "config/scheduler.rb"
+			PATH = "config/async/cron/scheduler.rb"
 			
 			def self.load(root = Dir.pwd)
 				path = ::File.join(root, PATH)
